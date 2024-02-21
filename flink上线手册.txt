@@ -1,0 +1,38 @@
+本次上线是在解放云环境
+kafka
+10.60.236.199:9092
+创建topic,9分区，3副本
+yk-t-beluga-flink-CloudDpfRegeneration-doris
+
+doris
+10.60.236.199
+数据库beluga
+执行dpf_regeneration_msg.sql
+
+流处理
+flink 部署机器  10.60.237.4  目录 /app/cg/
+mkdir  /app/cg/dpf_regeneration
+将FLINK目录下的dpf_regeneration目录上传 10.60.237.4:/app/cg/ 赋hdfs
+
+1 创建hdfs路径
+解放flink集群
+hdfs dfs -mkdir /flink1.13.2/savepoints/dpf_regeneration
+hdfs dfs -mkdir /flink1.13.2/checkpoints/dpf_regeneration
+hdfs dfs -mkdir /beluga/envs/flink/flink-common-deps/dpf_regeneration
+hdfs dfs -mkdir /beluga/envs/flink/flink-common-deps/dpf_regeneration/plugins
+hdfs dfs -mkdir /beluga/envs/flink/flink-common-deps/dpf_regeneration/lib
+
+2 上传flink依赖包
+将依赖包上传对应hdfs目录 （上传完本地可以删除）
+hdfs dfs -put /app/cg/dpf_regeneration/plugins/*.jar /beluga/envs/flink/flink-common-deps/dpf_regeneration/plugins
+hdfs dfs -put /app/cg/dpf_regeneration/lib/*.jar /beluga/envs/flink/flink-common-deps/dpf_regeneration/lib
+
+3 flink关闭日志
+flink 部署机器10.60.237.4 
+/app/flinkClient/flink-1.13.2/conf/log4j.properties
+使用hdfs用户 追加下面这些配置
+logger.dpf.name = com.smartlink.beluga.rtdw.dw.flink.dpf
+logger.dpf.level = error
+4  cd /app/cg/  启动 sh start.sh dpf_regeneration flink
+5  启动成功设置重启脚本
+
